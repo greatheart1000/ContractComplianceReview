@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.isoftstone.compliance.config.dao.IModelConfigMapper">
+	
+	<!-- 模型配置属性映射关系 -->
+    <resultMap id="modelConfigMap" type="com.isoftstone.compliance.config.model.ModelConfigEntity">
+        <result column="model_id"            property="modelId" jdbcType="VARCHAR" />
+        <result column="model_code"          property="modelCode" jdbcType="VARCHAR" />
+        <result column="model_name"          property="modelName" jdbcType="VARCHAR" />
+        <result column="model_key"           property="modelKey" jdbcType="VARCHAR" />
+        <result column="model_url"           property="modelUrl" jdbcType="VARCHAR" />
+        <result column="model_status"        property="modelStatus" jdbcType="VARCHAR" />
+        <result column="model_sort"          property="modelSort" jdbcType="NUMERIC" />
+        <result column="create_account"      property="createAccount" jdbcType="VARCHAR" />
+        <result column="create_date"         property="createDate" jdbcType="TIMESTAMP" />
+        <result column="last_update_account" property="lastUpdateAccount" jdbcType="VARCHAR" />
+        <result column="last_update_date"    property="lastUpdateDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 查询模型配置详情 -->
+    <select id="findModelConfigInfo" resultMap="modelConfigMap">
+        select oc.model_id,
+            oc.model_code,
+            oc.model_name,
+            oc.model_key,
+            oc.model_url,
+            oc.model_status,
+            oc.model_sort,
+            oc.create_account,
+            oc.create_date,
+            oc.last_update_account,
+            oc.last_update_date 
+        from cg_model_config_t oc
+        where oc.model_id = #{modelId,jdbcType=VARCHAR}
+        limit 1
+    </select>
+    
+    <!-- 按条件查询模型配置 -->
+    <select id="findModelConfigList" resultMap="modelConfigMap">
+        select oc.model_id,
+            oc.model_name
+        from cg_model_config_t oc
+        where oc.model_id is not null
+        <if test="ent.modelStatus != null and ent.modelStatus != '' ">
+            and oc.model_status = #{ent.modelStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.modelCode != null and ent.modelCode != '' ">
+            and oc.model_code = #{ent.modelCode,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.modelName != null and ent.modelName != '' ">
+            and oc.model_name = #{ent.modelName,jdbcType=VARCHAR}
+        </if>
+        order by oc.model_sort asc
+    </select>
+    
+    <!-- 分页查询模型配置 -->
+    <select id="findModelConfigByPageCount" resultType="int">
+        select count(1) from cg_model_config_t oc
+        where oc.model_id is not null
+        <if test="ent.modelStatus != null and ent.modelStatus != '' ">
+            and oc.model_status = #{ent.modelStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.modelCode != null and ent.modelCode != '' ">
+            and oc.model_code like CONCAT('%',#{ent.modelCode,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="ent.modelName != null and ent.modelName != '' ">
+            and oc.model_name like CONCAT('%',#{ent.modelName,jdbcType=VARCHAR},'%')
+        </if>
+    </select>
+    <select id="findModelConfigByPage" resultMap="modelConfigMap">
+        select oc.model_id,
+            oc.model_code,
+            oc.model_name,
+            oc.model_key,
+            oc.model_url,
+            oc.model_status,
+            oc.model_sort,
+            oc.create_account,
+            oc.create_date,
+            oc.last_update_account,
+            oc.last_update_date 
+        from cg_model_config_t oc
+        where oc.model_id is not null
+        <if test="ent.modelStatus != null and ent.modelStatus != '' ">
+            and oc.model_status = #{ent.modelStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.modelCode != null and ent.modelCode != '' ">
+            and oc.model_code like CONCAT('%',#{ent.modelCode,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="ent.modelName != null and ent.modelName != '' ">
+            and oc.model_name like CONCAT('%',#{ent.modelName,jdbcType=VARCHAR},'%')
+        </if>
+        order by oc.model_sort,oc.create_date desc
+        limit #{page.mySqlStart},#{page.pageSize}
+    </select>
+    
+    <!-- 新增模型配置 -->
+    <insert id="insertModelConfig">
+        insert into cg_model_config_t (
+            model_id,
+            model_code,
+            model_name,
+            model_key,
+            model_url,
+            model_status,
+            model_sort,
+            create_account,
+            create_date,
+            last_update_account,
+            last_update_date)
+        values (
+            #{ent.modelId,jdbcType=VARCHAR},
+            #{ent.modelCode,jdbcType=VARCHAR},
+            #{ent.modelName,jdbcType=VARCHAR},
+            #{ent.modelKey,jdbcType=VARCHAR},
+            #{ent.modelUrl,jdbcType=VARCHAR},
+            #{ent.modelStatus,jdbcType=VARCHAR},
+            #{ent.modelSort,jdbcType=NUMERIC},
+            #{ent.createAccount,jdbcType=VARCHAR}, 
+            now(), 
+            #{ent.createAccount,jdbcType=VARCHAR}, 
+            now()
+           )
+    </insert>
+    
+    <!-- 修改模型配置 -->
+    <update id="updateModelConfig">
+        update cg_model_config_t
+           set model_code          = #{ent.modelCode,jdbcType=VARCHAR},
+               model_name          = #{ent.modelName,jdbcType=VARCHAR},
+               model_key           = #{ent.modelKey,jdbcType=VARCHAR},
+               model_url           = #{ent.modelUrl,jdbcType=VARCHAR},
+               model_sort          = #{ent.modelSort,jdbcType=NUMERIC},
+               last_update_account = #{ent.currentAccount,jdbcType=VARCHAR},
+               last_update_date = now()
+         where model_id = #{ent.modelId,jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 修改模型配置状态 -->
+    <update id="updateModelConfigStatus">
+        update cg_model_config_t
+           set model_status        = #{ent.modelStatus,jdbcType=VARCHAR},
+               last_update_account = #{ent.createAccount,jdbcType=VARCHAR},
+               last_update_date = now()
+         where model_id = #{ent.modelId,jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 删除模型配置 -->
+    <delete id="deleteModelConfig">
+        delete from cg_model_config_t 
+        where model_id = #{modelId,jdbcType=VARCHAR}
+    </delete>
+    
+</mapper>

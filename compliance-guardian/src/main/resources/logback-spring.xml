@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<include resource="config/logback/yqv-base.xml" />
+    <contextName>compliance</contextName>
+    
+    <!--开发环境:打印控制台-->
+	<springProfile name="dev">
+        <logger name="com.ljh.yqvalley" level="debug"/>
+        <logger name="com.isoftstone.compliance" level="debug"/>
+	    <root level="info">
+	        <appender-ref ref="CONSOLE" />
+	        <appender-ref ref="DEBUG_FILE" />
+	        <appender-ref ref="INFO_FILE" />
+	        <appender-ref ref="ERROR_FILE" />
+	    </root>
+    </springProfile>
+    
+    <!--生产环境:输出到文件-->
+    <springProfile name="sit">
+        <root level="info">
+            <appender-ref ref="INFO_FILE" />
+            <appender-ref ref="ERROR_FILE" />
+        </root>
+    </springProfile>
+
+    <!--生产环境:输出到文件-->
+    <springProfile name="pro">
+        <root level="info">
+            <appender-ref ref="INFO_FILE" />
+            <appender-ref ref="ERROR_FILE" />
+        </root>
+    </springProfile>
+
+</configuration>

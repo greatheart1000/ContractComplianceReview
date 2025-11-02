@@ -1,0 +1,67 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /compliance
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  tomcat:
+    uri-encoding: UTF-8
+spring:
+  application:
+    name: compliance
+  profiles:
+    active: pro
+  servlet: 
+    multipart:
+      enabled: true #表示是否开启文件上传支持，默认为 true
+      file-size-threshold: 1KB   #默认为0，即没有限制
+      max-file-size: 20MB       #上传的单个文件的最大大小，默认为 1MB
+      max-request-size: 100MB    #多文件上传时文件的总大小，默认为 10MB
+      resolve-lazily: false    #表示文件是否延迟解析，默认为 false
+  datasource:
+     #账号配置
+     url: jdbc:mysql://139.159.201.66:3306/compliance?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true
+     username: root
+     password: 435F4C86B5E5264CE0DB06D7282644EABF44C4B9EA467FCB7DADB5F88647AD8B
+     driver-class-name: com.mysql.cj.jdbc.Driver
+     type: com.ljh.yqvalley.ValleyHikariDataSource
+     hikari:
+      pool-name: Retail_HikariCP
+      minimum-idle: 5 #最小空闲连接数量
+      idle-timeout: 180000 #空闲连接存活最大时间，默认600000（10分钟）
+      maximum-pool-size: 20 #连接池最大连接数，默认是20
+      auto-commit: true  #此属性控制从池返回的连接的默认自动提交行为,默认值：true
+      max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+      connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
+      connection-test-query: SELECT 1
+      connection-init-sql: set names utf8mb4
+  data:
+    redis:
+      host: 124.71.14.60
+      port: 6379
+      #cluster: 
+        #nodes: 127.0.0.1:6001,127.0.0.1:6002,127.0.0.1:6003,127.0.0.1:6004,127.0.0.1:6005,127.0.0.1:6006
+      password: 6CCC80B131DE46C353AB8A337285DC14BF44C4B9EA467FCB7DADB5F88647AD8B
+      timeout: 3000ms
+      database: 0
+  ai:
+    openai:
+      client:
+        enabled: false
+      api-key: 你的API_KEY
+      base-url: https://api.openai.com
+mybatis:
+  mapper-locations: classpath*:com/ljh/yqvalley/**/dao/*Mapper.xml,com/isoftstone/compliance/**/dao/*Mapper.xml
+  type-aliases-package: com.ljh.yqvalley.**.model,com.isoftstone.compliance.**.model
+logging:
+  config: classpath:logback-spring.xml
+  path: /home/release/compliance/log
+yqv:
+  authorityPackage: com.ljh.yqvalley.*,com.isoftstone.compliance.*
+  authorityModuleCode: yqv,compliance
+  authorityModuleName: 框架,企业合规
+  filePath: /home/release/compliance
+  redisKey: compliance_pro_
+  aesPublicKey: 31FFC9CFFD9E5AEB

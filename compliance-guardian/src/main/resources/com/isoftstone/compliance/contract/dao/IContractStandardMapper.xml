@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.isoftstone.compliance.contract.dao.IContractStandardMapper">
+	
+	<!-- 标准规则属性映射关系 -->
+    <resultMap id="ruleMap" type="com.isoftstone.compliance.contract.model.ContractStandardEntity">
+        <result column="rule_id"             property="ruleId" jdbcType="VARCHAR" />
+        <result column="data_type"           property="dataType" jdbcType="VARCHAR" />
+        <result column="rule_type"           property="ruleType" jdbcType="VARCHAR" />
+        <result column="rule_name"           property="ruleName" jdbcType="VARCHAR" />
+        <result column="contract_type"       property="contractType" jdbcType="VARCHAR" />
+        <result column="check_content"       property="checkContent" jdbcType="VARCHAR" />
+        <result column="solve_suggest"       property="solveSuggest" jdbcType="VARCHAR" />
+        <result column="rule_status"         property="ruleStatus" jdbcType="VARCHAR" />
+        <result column="create_account"      property="createAccount" jdbcType="VARCHAR" />
+        <result column="create_date"         property="createDate" jdbcType="TIMESTAMP" />
+        <result column="last_update_account" property="lastUpdateAccount" jdbcType="VARCHAR" />
+        <result column="last_update_date"    property="lastUpdateDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 查询标准规则详情 -->
+    <select id="findContractStandardInfo" resultMap="ruleMap">
+        select cr.rule_id,
+        	cr.data_type,
+            cr.rule_type,
+            cr.rule_name,
+            cr.contract_type,
+            cr.check_content,
+            cr.solve_suggest,
+            cr.rule_status,
+            cr.create_account,
+            cr.create_date,
+            cr.last_update_account,
+            cr.last_update_date 
+        from cg_contract_standard_t cr
+        where cr.rule_id = #{ruleId,jdbcType=VARCHAR}
+        limit 1
+    </select>
+    
+    <!-- 按条件查询标准规则 -->
+    <select id="findContractStandardList" resultType="com.isoftstone.compliance.chat.model.ChatCheckRuleEntity">
+        select cr.rule_name as ruleName,
+        	cr.rule_type as ruleType,
+        	cr.contract_type as contractType,
+            cr.check_content as checkContent,
+            cr.solve_suggest as solveSuggest
+        from cg_contract_standard_t cr
+        where cr.rule_id is not null
+        <if test="ent.dataType != null and ent.dataType != '' ">
+            and cr.data_type = #{ent.dataType,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleStatus != null and ent.ruleStatus != '' ">
+            and cr.rule_status = #{ent.ruleStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleType != null and ent.ruleType != '' ">
+            and cr.rule_type = #{ent.ruleType,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.contractType != null and ent.contractType != '' ">
+            and (cr.contract_type = #{ent.contractType,jdbcType=VARCHAR}
+				or cr.contract_type like CONCAT(#{ent.contractType,jdbcType=VARCHAR},'#%')
+				or cr.contract_type like CONCAT('%#',#{ent.contractType,jdbcType=VARCHAR})
+				or cr.contract_type like CONCAT('%#',#{ent.contractType,jdbcType=VARCHAR},'#%')
+			)
+        </if>
+        order by cr.rule_type asc
+    </select>
+    
+    <!-- 分页查询标准规则 -->
+    <select id="findContractStandardByPageCount" resultType="int">
+        select count(1) from cg_contract_standard_t cr
+        where cr.rule_id is not null
+        <if test="ent.dataType != null and ent.dataType != '' ">
+            and cr.data_type = #{ent.dataType,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleName != null and ent.ruleName != '' ">
+            and cr.rule_name = #{ent.ruleName,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleStatus != null and ent.ruleStatus != '' ">
+            and cr.rule_status = #{ent.ruleStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleType != null and ent.ruleType != '' ">
+            and cr.rule_type = #{ent.ruleType,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.contractType != null and ent.contractType != '' ">
+            and cr.contract_type like CONCAT('%',#{ent.contractType,jdbcType=VARCHAR},'%')
+        </if>
+    </select>
+    <select id="findContractStandardByPage" resultMap="ruleMap">
+        select cr.rule_id,
+        	cr.data_type,
+            cr.rule_type,
+            cr.rule_name,
+            cr.contract_type,
+            cr.check_content,
+            cr.solve_suggest,
+            cr.rule_status,
+            cr.create_account,
+            cr.create_date,
+            cr.last_update_account,
+            cr.last_update_date 
+        from cg_contract_standard_t cr
+        where cr.rule_id is not null
+        <if test="ent.dataType != null and ent.dataType != '' ">
+            and cr.data_type = #{ent.dataType,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleName != null and ent.ruleName != '' ">
+            and cr.rule_name = #{ent.ruleName,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleStatus != null and ent.ruleStatus != '' ">
+            and cr.rule_status = #{ent.ruleStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.ruleType != null and ent.ruleType != '' ">
+            and cr.rule_type = #{ent.ruleType,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.contractType != null and ent.contractType != '' ">
+            and cr.contract_type like CONCAT('%',#{ent.contractType,jdbcType=VARCHAR},'%')
+        </if>
+        order by cr.rule_type,cr.create_date desc
+        limit #{page.mySqlStart},#{page.pageSize}
+    </select>
+    
+    <!-- 新增标准规则 -->
+    <insert id="insertContractStandard">
+        insert into cg_contract_standard_t (
+            rule_id,
+            data_type,
+            rule_type,
+            rule_name,
+            contract_type,
+            check_content,
+            solve_suggest,
+            rule_status,
+            create_account,
+            create_date,
+            last_update_account,
+            last_update_date)
+        values (
+            #{ent.ruleId,jdbcType=VARCHAR},
+            #{ent.dataType,jdbcType=VARCHAR},
+            #{ent.ruleType,jdbcType=VARCHAR},
+            #{ent.ruleName,jdbcType=VARCHAR},
+            #{ent.contractType,jdbcType=VARCHAR},
+            #{ent.checkContent,jdbcType=VARCHAR},
+            #{ent.solveSuggest,jdbcType=VARCHAR},
+            #{ent.ruleStatus,jdbcType=VARCHAR},
+            #{ent.createAccount,jdbcType=VARCHAR}, 
+            now(), 
+            #{ent.createAccount,jdbcType=VARCHAR}, 
+            now()
+           )
+    </insert>
+    
+    <!-- 修改标准规则 -->
+    <update id="updateContractStandard">
+        update cg_contract_standard_t
+           set rule_type           = #{ent.ruleType,jdbcType=VARCHAR},
+               rule_name           = #{ent.ruleName,jdbcType=VARCHAR},
+               contract_type       = #{ent.contractType,jdbcType=VARCHAR},
+               check_content       = #{ent.checkContent,jdbcType=VARCHAR},
+               solve_suggest       = #{ent.solveSuggest,jdbcType=VARCHAR},
+               last_update_account = #{ent.currentAccount,jdbcType=VARCHAR},
+               last_update_date = now()
+         where rule_id = #{ent.ruleId,jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 修改标准规则状态 -->
+    <update id="updateContractStandardStatus">
+        update cg_contract_standard_t
+           set rule_status         = #{ent.ruleStatus,jdbcType=VARCHAR},
+               last_update_account = #{ent.createAccount,jdbcType=VARCHAR},
+               last_update_date = now()
+         where rule_id = #{ent.ruleId,jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 删除标准规则 -->
+    <delete id="deleteContractStandard">
+        delete from cg_contract_standard_t 
+        where rule_id = #{ruleId,jdbcType=VARCHAR}
+    </delete>
+    
+</mapper>

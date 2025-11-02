@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.isoftstone.compliance.config.dao.IModelUserManageMapper">
+	
+	<resultMap id="userMap" type="com.isoftstone.compliance.config.model.ModelUserEntity">
+        <result column="user_account" property="userAccount" jdbcType="VARCHAR" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="face_file_id" property="faceFileId" jdbcType="VARCHAR" />
+        <result column="mail_address" property="mailAddress" jdbcType="VARCHAR" />
+        <result column="phone_number" property="phoneNumber" jdbcType="VARCHAR" />
+        <result column="account_status" property="accountStatus" jdbcType="VARCHAR" />
+        <result column="account_type" property="accountType" jdbcType="VARCHAR"/>
+        <result column="default_login_pwd" property="defaultLoginPwd" jdbcType="VARCHAR" />
+        <result column="default_login_pwd_expire" property="defaultLoginPwdExpire" jdbcType="VARCHAR" />
+        <result column="login_pwd" property="loginPwd" jdbcType="VARCHAR" />
+        <result column="dept_code" property="deptCode" jdbcType="VARCHAR" />
+        <result column="dept_name" property="deptName" jdbcType="VARCHAR" />
+        <result column="level1_dept_code" property="level1DeptCode" jdbcType="VARCHAR" />
+        <result column="level1_dept_name" property="level1DeptName" jdbcType="VARCHAR" />
+        <result column="level2_dept_code" property="level2DeptCode" jdbcType="VARCHAR" />
+        <result column="level2_dept_name" property="level2DeptName" jdbcType="VARCHAR" />
+        <result column="level3_dept_code" property="level3DeptCode" jdbcType="VARCHAR" />
+        <result column="level3_dept_name" property="level3DeptName" jdbcType="VARCHAR" />
+        <result column="level4_dept_code" property="level4DeptCode" jdbcType="VARCHAR" />
+        <result column="level4_dept_name" property="level4DeptName" jdbcType="VARCHAR" />
+        <result column="level5_dept_code" property="level5DeptCode" jdbcType="VARCHAR" />
+        <result column="level5_dept_name" property="level5DeptName" jdbcType="VARCHAR" />
+        <result column="create_account"   property="createAccount" jdbcType="VARCHAR" />
+        <result column="create_date"      property="createDate" jdbcType="TIMESTAMP" />
+        <result column="last_update_account" property="lastUpdateAccount" jdbcType="VARCHAR" />
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 公共查询条件 -->
+    <sql id="user_condition">
+        <if test="ent.userAccount != null and ent.userAccount != '' ">
+            and u.user_account = #{ent.userAccount,jdbcType=VARCHAR}
+        </if>
+    	<if test="ent.userName != null and ent.userName != '' ">
+        	and u.user_name like CONCAT('%',#{ent.userName,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="ent.accountType != null and ent.accountType != '' ">
+        	and u.account_type = #{ent.accountType,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.accountStatus != null and ent.accountStatus != '' ">
+            and u.account_status = #{ent.accountStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.deptCode !=null and ent.deptCode != '' ">
+            and u.dept_code = #{ent.deptCode,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.mailAddress !=null and ent.mailAddress != '' ">
+            and u.mail_address = #{ent.mailAddress,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.phoneNumber !=null and ent.phoneNumber != '' ">
+            and u.phone_number = #{ent.phoneNumber,jdbcType=VARCHAR}
+        </if>
+        <if test="ent.parentCode !=null and ent.parentCode != '' ">
+            and (u.dept_code = #{ent.parentCode,jdbcType=VARCHAR} 
+            or u.level1_dept_code = #{ent.parentCode,jdbcType=VARCHAR} 
+            or u.level2_dept_code = #{ent.parentCode,jdbcType=VARCHAR} 
+            or u.level3_dept_code = #{ent.parentCode,jdbcType=VARCHAR} 
+            or u.level4_dept_code = #{ent.parentCode,jdbcType=VARCHAR} 
+            or u.level5_dept_code = #{ent.parentCode,jdbcType=VARCHAR})
+        </if>
+        <if test="ent.matchSearch != null and ent.matchSearch != '' ">
+            and (u.user_account like CONCAT('%',#{ent.matchSearch,jdbcType=VARCHAR},'%')
+            or u.user_name like CONCAT('%',#{ent.matchSearch,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="ent.excludeTypeList !=null">
+            and u.account_type not in
+            <foreach collection="ent.excludeTypeList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+    
+    <!-- 查询单条用户信息 -->
+    <select id="findModelUserSimpleInfo" resultMap="userMap">
+        select u.user_account,
+             u.user_name,
+             u.face_file_id,
+             u.mail_address,
+             u.phone_number,
+             u.account_type
+        from cg_model_user_t u
+        where u.user_account = #{userAccount,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 查询单条用户信息 -->
+    <select id="findModelUserInfo" resultMap="userMap">
+        select u.user_account,
+             u.user_name,
+             u.face_file_id,
+             u.mail_address,
+             u.phone_number,
+             u.account_status,
+             u.account_type,
+             u.dept_code,
+             di.dept_name,
+             u.level1_dept_code,
+             di1.dept_name level1_dept_name,
+             u.level2_dept_code,
+             di2.dept_name level2_dept_name,
+             u.level3_dept_code,
+             di3.dept_name level3_dept_name,
+             u.level4_dept_code,
+             di4.dept_name level4_dept_name,
+             u.level5_dept_code,
+             di5.dept_name level5_dept_name,
+             u.create_account,
+             u.create_date,
+             u.last_update_account,
+             u.last_update_date
+        from cg_model_user_t u
+        left join yqv_valley_dept_info_t di on u.dept_code=di.dept_code and di.dept_status='Y'
+        left join yqv_valley_dept_info_t di1 on u.level1_dept_code=di1.dept_code and di1.dept_status='Y'
+        left join yqv_valley_dept_info_t di2 on u.level2_dept_code=di2.dept_code and di2.dept_status='Y'
+        left join yqv_valley_dept_info_t di3 on u.level3_dept_code=di3.dept_code and di3.dept_status='Y'
+        left join yqv_valley_dept_info_t di4 on u.level4_dept_code=di4.dept_code and di4.dept_status='Y'
+        left join yqv_valley_dept_info_t di5 on u.level5_dept_code=di5.dept_code and di5.dept_status='Y'
+        where u.user_account = #{userAccount,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 查询用户完整信息 -->
+    <select id="findModelAllUserInfo" resultMap="userMap">
+        select u.user_account,
+             u.user_name,
+             u.face_file_id,
+             u.mail_address,
+             u.phone_number,
+             u.account_status,
+             u.account_type,
+             u.login_pwd,
+             u.default_login_pwd,
+             case when DATE_ADD(u.create_date,INTERVAL 24 HOUR)>=now() and (u.default_login_pwd is not null or u.default_login_pwd='') then 'Y' else 'N' end default_login_pwd_expire,
+             u.dept_code,
+             di.dept_name,
+             u.level1_dept_code,
+             di1.dept_name level1_dept_name,
+             u.level2_dept_code,
+             di2.dept_name level2_dept_name,
+             u.level3_dept_code,
+             di3.dept_name level3_dept_name,
+             u.level4_dept_code,
+             di4.dept_name level4_dept_name,
+             u.level5_dept_code,
+             di5.dept_name level5_dept_name,
+             u.create_account,
+             u.create_date,
+             u.last_update_account,
+             u.last_update_date
+        from cg_model_user_t u
+        left join yqv_valley_dept_info_t di on u.dept_code=di.dept_code and di.dept_status='Y'
+        left join yqv_valley_dept_info_t di1 on u.level1_dept_code=di1.dept_code and di1.dept_status='Y'
+        left join yqv_valley_dept_info_t di2 on u.level2_dept_code=di2.dept_code and di2.dept_status='Y'
+        left join yqv_valley_dept_info_t di3 on u.level3_dept_code=di3.dept_code and di3.dept_status='Y'
+        left join yqv_valley_dept_info_t di4 on u.level4_dept_code=di4.dept_code and di4.dept_status='Y'
+        left join yqv_valley_dept_info_t di5 on u.level5_dept_code=di5.dept_code and di5.dept_status='Y'
+        where u.user_account = #{userAccount,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 查询用户登录信息 -->
+    <select id="findModelLoginInfo" resultType="com.isoftstone.compliance.config.model.ModelUserLoginEntity">
+        select u.user_account userAccount,
+             u.user_name userName,
+             u.login_pwd loginPwd,
+             u.default_login_pwd defaultLoginPwd,
+             u.account_type accountType,
+             case when DATE_ADD(u.create_date,INTERVAL 24 HOUR)>=now() and (u.default_login_pwd is not null or u.default_login_pwd='') then 'Y' else 'N' end defaultLoginPwdExpire
+        from cg_model_user_t u
+        where u.user_account is not null
+        and (u.user_account = #{ent.userAccount,jdbcType=VARCHAR}
+        or u.mail_address = #{ent.mailAddress,jdbcType=VARCHAR}
+        or u.phone_number = #{ent.phoneNumber,jdbcType=VARCHAR})
+    </select>
+
+	<!-- 分页查询用户列表-->
+	<select id="findModelUserByPageCount" resultType="int">
+		select count(1) from cg_model_user_t u
+		where u.user_account is not null
+		<include refid="user_condition"></include>
+	</select>
+	<select id="findModelUserByPage" resultMap="userMap">
+        select u.user_account,
+             u.user_name,
+             u.face_file_id,
+             u.mail_address,
+             u.phone_number,
+             u.account_status,
+             u.account_type,
+             u.dept_code,
+             di.dept_name,
+             u.level1_dept_code,
+             di1.dept_name level1_dept_name,
+             u.level2_dept_code,
+             di2.dept_name level2_dept_name,
+             u.level3_dept_code,
+             di3.dept_name level3_dept_name,
+             u.level4_dept_code,
+             di4.dept_name level4_dept_name,
+             u.level5_dept_code,
+             di5.dept_name level5_dept_name,
+             u.create_account,
+             u.create_date,
+             u.last_update_account,
+             u.last_update_date
+        from cg_model_user_t u
+        left join yqv_valley_dept_info_t di on u.dept_code=di.dept_code and di.dept_status='Y'
+        left join yqv_valley_dept_info_t di1 on u.level1_dept_code=di1.dept_code and di1.dept_status='Y'
+        left join yqv_valley_dept_info_t di2 on u.level2_dept_code=di2.dept_code and di2.dept_status='Y'
+        left join yqv_valley_dept_info_t di3 on u.level3_dept_code=di3.dept_code and di3.dept_status='Y'
+        left join yqv_valley_dept_info_t di4 on u.level4_dept_code=di4.dept_code and di4.dept_status='Y'
+        left join yqv_valley_dept_info_t di5 on u.level5_dept_code=di5.dept_code and di5.dept_status='Y'
+        where u.user_account is not null
+        <include refid="user_condition"></include>
+        order by create_date desc
+        limit #{page.mySqlStart},#{page.pageSize}
+	</select>
+
+    <!-- 新增用户 -->
+    <insert id="insertModelUserInfo">
+    	insert into cg_model_user_t
+			  (user_account,
+			   user_name,
+			   login_pwd,
+			   face_file_id,
+			   mail_address,
+			   phone_number,
+			   account_type,
+               account_status,
+			   default_login_pwd,
+			   dept_code,
+			   level1_dept_code,
+			   level2_dept_code,
+			   level3_dept_code,
+			   level4_dept_code,
+			   level5_dept_code,
+			   create_account,
+			   create_date,
+			   last_update_account,
+			   last_update_date)
+			values
+			  (#{ent.userAccount,jdbcType=VARCHAR},
+			   #{ent.userName,jdbcType=VARCHAR},
+			   #{ent.loginPwd,jdbcType=VARCHAR},
+			   #{ent.faceFileId,jdbcType=VARCHAR},
+			   #{ent.mailAddress,jdbcType=VARCHAR},
+			   #{ent.phoneNumber,jdbcType=VARCHAR},
+			   #{ent.accountType,jdbcType=VARCHAR},
+               #{ent.accountStatus,jdbcType=VARCHAR},
+			   #{ent.defaultLoginPwd,jdbcType=VARCHAR},
+			   #{ent.deptCode,jdbcType=VARCHAR},
+			   #{ent.level1DeptCode,jdbcType=VARCHAR},
+			   #{ent.level2DeptCode,jdbcType=VARCHAR},
+			   #{ent.level3DeptCode,jdbcType=VARCHAR},
+			   #{ent.level4DeptCode,jdbcType=VARCHAR},
+			   #{ent.level5DeptCode,jdbcType=VARCHAR},
+			   #{ent.createAccount,jdbcType=VARCHAR},
+			   now(),
+			   #{ent.createAccount,jdbcType=VARCHAR},
+			   now())
+    </insert>
+
+    <!-- 修改用户信息 -->
+    <update id="updateModelUserInfo">
+    	update cg_model_user_t u
+		   set u.user_name = #{ent.userName,jdbcType=VARCHAR},
+	       <if test="ent.faceFileId != null and ent.faceFileId != ''">
+               u.face_file_id         = #{ent.faceFileId,jdbcType=VARCHAR},
+           </if>
+           <if test="ent.mailAddress != null and ent.mailAddress != ''">
+               u.mail_address         = #{ent.mailAddress,jdbcType=VARCHAR},
+           </if>
+           <if test="ent.phoneNumber != null and ent.phoneNumber != ''">
+               u.phone_number         = #{ent.phoneNumber,jdbcType=VARCHAR},
+           </if>
+           <if test="ent.deptCode != null and ent.deptCode != ''">
+               u.dept_code        = #{ent.deptCode,jdbcType=VARCHAR},
+               u.level1_dept_code = #{ent.level1DeptCode,jdbcType=VARCHAR},
+               u.level2_dept_code = #{ent.level2DeptCode,jdbcType=VARCHAR},
+               u.level3_dept_code = #{ent.level3DeptCode,jdbcType=VARCHAR},
+               u.level4_dept_code = #{ent.level4DeptCode,jdbcType=VARCHAR},
+               u.level5_dept_code = #{ent.level5DeptCode,jdbcType=VARCHAR},
+           </if>
+	       u.last_update_account  = #{ent.currentAccount,jdbcType=VARCHAR},
+	       u.last_update_date = now()
+		 where u.user_account = #{ent.userAccount,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 修改用户状态 -->
+    <update id="updateModelUserStatus">
+    	update cg_model_user_t u
+		   set u.account_status = #{accountStatus,jdbcType=VARCHAR},
+		       u.last_update_account = #{currentAccount,jdbcType=VARCHAR},
+		       u.last_update_date = now()
+		 where u.user_account in
+		 <foreach collection="list" item="item"  open="(" close=")" separator=",">
+             #{item}
+         </foreach>
+    </update>
+    
+    <!-- 修改账号部门 -->
+    <update id="updateModelUserDept">
+        update cg_model_user_t u
+           set u.dept_code = #{ent.deptCode,jdbcType=VARCHAR},
+           u.level1_dept_code = #{ent.level1Code,jdbcType=VARCHAR},
+           u.level2_dept_code = #{ent.level2Code,jdbcType=VARCHAR},
+           u.level3_dept_code = #{ent.level3Code,jdbcType=VARCHAR},
+           u.level4_dept_code = #{ent.level4Code,jdbcType=VARCHAR},
+           u.level5_dept_code = null,
+           u.last_update_account = #{currentAccount,jdbcType=VARCHAR},
+           u.last_update_date = now()
+         where u.user_account in
+         <foreach collection="list" item="item"  open="(" close=")" separator=",">
+             #{item}
+         </foreach>
+    </update>
+
+    <!-- 修改登录密码 -->
+    <update id="updateModelLoginPwd">
+    	update cg_model_user_t u
+           set u.login_pwd      = #{loginPwd,jdbcType=VARCHAR},
+           u.default_login_pwd  = #{defaultLoginPwd,jdbcType=VARCHAR},
+           u.last_update_account= #{currentAccount,jdbcType=VARCHAR},
+           u.last_update_date   = now()
+         where u.user_account = #{userAccount,jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 查询重复用户数量 -->
+    <select id="findModelUserCount" resultType="int">
+    	select count(1)
+        from cg_model_user_t u
+        where u.user_account is not null
+        <if test="userAccount != null and userAccount != '' ">
+            and u.user_account != #{userAccount,jdbcType=VARCHAR}
+        </if>
+        and (
+            u.user_account is null
+	        <if test="ent.userAccount != null and ent.userAccount != '' ">
+	            or u.user_account = #{ent.userAccount,jdbcType=VARCHAR}
+	        </if>
+	        <if test="ent.mailAddress != null and ent.mailAddress != '' ">
+	            or u.mail_address = #{ent.mailAddress,jdbcType=VARCHAR}
+	        </if>
+	        <if test="ent.phoneNumber != null and ent.phoneNumber != '' ">
+	            or u.phone_number = #{ent.phoneNumber,jdbcType=VARCHAR}
+	        </if>
+        )
+    </select>
+    
+</mapper>

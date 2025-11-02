@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.isoftstone.compliance.chat.dao.IChatComplianceMapper">
+	
+	<resultMap id="chatMap" type="com.isoftstone.compliance.chat.model.ChatComplianceEntity">
+        <result column="chat_id"             property="chatId" jdbcType="VARCHAR" />
+        <result column="chat_title"          property="chatTitle" jdbcType="VARCHAR" />
+        <result column="compliance_type"     property="complianceType" jdbcType="VARCHAR" />
+        <result column="model_id"            property="modelId" jdbcType="VARCHAR" />
+        <result column="contract_type"       property="contractType" jdbcType="VARCHAR" />
+        <result column="create_account"      property="createAccount" jdbcType="VARCHAR" />
+        <result column="create_date"         property="createDate" jdbcType="TIMESTAMP" />
+        <result column="last_update_account" property="lastUpdateAccount" jdbcType="VARCHAR" />
+        <result column="last_update_date"    property="lastUpdateDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <resultMap id="recordMap" type="com.isoftstone.compliance.chat.model.ChatRecordEntity">
+        <result column="record_id"           property="recordId" jdbcType="VARCHAR" />
+        <result column="chat_id"           	 property="chatId" jdbcType="VARCHAR" />
+        <result column="chat_role"           property="chatRole" jdbcType="VARCHAR" />
+        <result column="chat_content"        property="content" jdbcType="VARCHAR" />
+        <result column="create_account"      property="createAccount" jdbcType="VARCHAR" />
+        <result column="create_date"         property="createDate" jdbcType="TIMESTAMP" />
+    </resultMap>
+    
+    <!-- 查询指定条件会话信息 -->
+    <select id="findChatSession" resultMap="chatMap">
+        select cs.chat_id,
+		   cs.chat_title,
+		   cs.compliance_type,
+		   cs.model_id,
+		   cs.contract_type,
+		   cs.create_account,
+		   cs.create_date,
+		   cs.last_update_account,
+		   cs.last_update_date 
+		from cg_chat_session_t cs
+        where cs.create_account = #{ent.createAccount,jdbcType=VARCHAR}
+        <if test="ent.chatId !=null and ent.chatId != '' ">
+            and cs.chat_id = #{ent.chatId,jdbcType=VARCHAR}
+        </if>
+        order by cs.create_date desc
+    </select>
+
+	<!-- 分页查询会话列表-->
+	<select id="findChatSessionByPageCount" resultType="int">
+		select count(cs.chat_id) as qty from cg_chat_session_t cs
+        where cs.create_account = #{ent.createAccount,jdbcType=VARCHAR}
+	</select>
+	<select id="findChatSessionByPage" resultMap="chatMap">
+        select cs.chat_id,
+		   cs.chat_title,
+		   cs.compliance_type,
+		   cs.model_id,
+		   cs.contract_type,
+		   cs.create_account,
+		   cs.create_date,
+		   cs.last_update_account,
+		   cs.last_update_date 
+		from cg_chat_session_t cs
+        where cs.create_account = #{ent.createAccount,jdbcType=VARCHAR}
+        order by cs.create_date desc
+        limit #{page.mySqlStart},#{page.pageSize}
+	</select>
+
+    <!-- 插入会话信息 -->
+    <insert id="insertChatSession">
+    	insert into cg_chat_session_t
+		(
+		   chat_id,
+		   chat_title,
+		   compliance_type,
+		   model_id,
+		   contract_type,
+		   create_account,
+		   create_date,
+		   last_update_account,
+		   last_update_date
+		)
+		values
+		(
+		   #{ent.chatId,jdbcType=VARCHAR},
+		   #{ent.chatTitle,jdbcType=VARCHAR},
+		   #{ent.complianceType,jdbcType=VARCHAR},
+		   #{ent.modelId,jdbcType=VARCHAR},
+		   #{ent.contractType,jdbcType=VARCHAR},
+		   #{ent.createAccount,jdbcType=VARCHAR},
+		   now(),
+		   #{ent.createAccount,jdbcType=VARCHAR},
+		   now()
+		)
+    </insert>
+    
+    <!-- 删除会话信息 -->
+    <delete id="deleteChatSession">
+        delete from cg_chat_session_t
+        where create_account = #{createAccount,jdbcType=VARCHAR}
+        <if test="chatId !=null and chatId != '' ">
+            and chat_id = #{chatId,jdbcType=VARCHAR}
+        </if>
+    </delete>
+    
+    <!-- 删除会话记录 -->
+    <delete id="deleteChatProblem">
+        delete from cg_chat_record_t
+        where chat_id in(
+        	select chat_id from cg_chat_session_t
+	        where create_account = #{createAccount,jdbcType=VARCHAR}
+	        <if test="chatId !=null and chatId != '' ">
+	            and chat_id = #{chatId,jdbcType=VARCHAR}
+	        </if>
+        )
+    </delete>
+    
+    <!-- 分页查询会话记录-->
+	<select id="findChatProblemByPageCount" resultType="int">
+		select count(cr.record_id) as qty from cg_chat_record_t cr
+        where cr.create_account = #{ent.createAccount,jdbcType=VARCHAR}
+        and cr.chat_id = #{ent.chatId,jdbcType=VARCHAR}
+	</select>
+	<select id="findChatProblemByPage" resultMap="recordMap">
+        select cr.record_id,
+		   cr.chat_id,
+		   cr.chat_role,
+		   cr.chat_content,
+		   cr.create_account,
+		   cr.create_date 
+		from cg_chat_record_t cr
+        where cr.create_account = #{ent.createAccount,jdbcType=VARCHAR}
+        and cr.chat_id = #{ent.chatId,jdbcType=VARCHAR}
+        order by cr.create_date asc
+        limit #{page.mySqlStart},#{page.pageSize}
+	</select>
+	
+	<!-- 查询会话记录列表-->
+	<select id="findChatRecordList" resultMap="recordMap">
+        select cr.record_id,
+		   cr.chat_id,
+		   cr.chat_role,
+		   cr.chat_content,
+		   cr.create_account,
+		   cr.create_date 
+		from cg_chat_record_t cr
+        where cr.create_account = #{ent.createAccount,jdbcType=VARCHAR}
+        and cr.chat_id = #{ent.chatId,jdbcType=VARCHAR}
+        order by cr.create_date asc
+	</select>
+	
+	<!-- 插入会话记录 -->
+    <insert id="insertChatProblem">
+    	insert into cg_chat_record_t
+		(
+		   record_id,
+		   chat_id,
+		   chat_role,
+		   chat_content,
+		   create_account,
+		   create_date)
+		values
+		(
+		   #{ent.recordId,jdbcType=VARCHAR},
+		   #{ent.chatId,jdbcType=VARCHAR},
+		   #{ent.chatRole,jdbcType=VARCHAR},
+		   #{ent.content,jdbcType=VARCHAR},
+		   #{ent.createAccount,jdbcType=VARCHAR},
+		   now()
+		)
+    </insert>
+    
+    <!-- 查询历史会话记录 -->
+    <select id="findChatProblemList" resultType="com.isoftstone.compliance.chat.model.ChatPromptEntity">
+        select cr.chat_role as chatRole,
+		   cr.chat_content as content
+		from cg_chat_record_t cr
+        where cr.chat_id = #{chatId,jdbcType=VARCHAR}
+        order by record_id asc,cr.create_date asc
+	</select>
+	
+	<!-- 查询会话记录文件 -->
+    <select id="findChatRecordFileList" resultType="com.ljh.yqvalley.file.model.ValleyFileEntity">
+        select crf.file_id as fileId,
+		   crf.file_name as fileName,
+		   crf.file_type as fileType
+		from cg_chat_record_file_t crf
+        where crf.record_id = #{recordId,jdbcType=VARCHAR}
+        order by crf.file_id asc
+	</select>
+	
+	<!-- 插入会话记录文件 -->
+    <insert id="insertChatRecordFile">
+    	insert into cg_chat_record_file_t
+		(
+		   record_id,
+		   chat_id,
+		   file_id,
+		   file_name,
+		   file_type)
+		select #{recordId,jdbcType=VARCHAR},
+			#{chatId,jdbcType=VARCHAR},
+			file_id,
+			file_name,
+			file_type 
+		from yqv_file_storage_t
+		where file_id in
+		<foreach collection="list" item="item"  open="(" close=")" separator=",">
+            #{item.fileId}
+        </foreach>
+    </insert>
+    
+    <!-- 删除会话记录文件 -->
+    <delete id="deleteChatRecordFile">
+        delete from cg_chat_record_file_t
+        where chat_id in(
+        	select chat_id from cg_chat_session_t
+	        where create_account = #{createAccount,jdbcType=VARCHAR}
+	        <if test="chatId !=null and chatId != '' ">
+	            and chat_id = #{chatId,jdbcType=VARCHAR}
+	        </if>
+        )
+    </delete>
+    
+</mapper>

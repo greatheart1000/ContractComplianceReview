@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	
+	<!-- 用户导入配置 -->
+	<bean id="modelUser.excelImport" class="com.ljh.yqvalley.file.model.ImportExcelEntity">
+		<property name="consumerBeanId">
+			<value>modelUserImportConsumer</value>
+		</property>
+		<property name="fileName">
+			<value>userTemp</value>
+		</property>
+		<property name="sheetName">
+			<value>userInfo</value>
+		</property>
+		<property name="columns">
+			<map>
+				<entry key="用户帐号*" value-ref="modelUser.column1"></entry>
+				<entry key="用户姓名*" value-ref="modelUser.column2"></entry>
+				<entry key="电子邮箱*" value-ref="modelUser.column3"></entry>
+				<entry key="手机号码*" value-ref="modelUser.column4"></entry>
+				<entry key="账号类型" value-ref="modelUser.column5"></entry>
+			</map>
+		</property>
+	</bean>
+	<!-- 用户帐号 -->
+	<bean id="modelUser.column1" class="com.ljh.yqvalley.file.model.ExcelColumnEntity">
+		<property name="fieldName" value="userAccount"></property>
+		<property name="validator" value="required"></property>
+		<property name="columnWidth" value="3200"></property>
+	</bean>
+	<!-- 用户姓名 -->
+	<bean id="modelUser.column2" class="com.ljh.yqvalley.file.model.ExcelColumnEntity">
+		<property name="fieldName" value="userName"></property>
+		<property name="validator" value="required"></property>
+		<property name="columnWidth" value="3200"></property>
+	</bean>
+	<!-- 电子邮箱 -->
+	<bean id="modelUser.column3" class="com.ljh.yqvalley.file.model.ExcelColumnEntity">
+		<property name="fieldName" value="mailAddress"></property>
+		<property name="validator" value="required"></property>
+		<property name="columnWidth" value="5000"></property>
+	</bean>
+	<!-- 手机号码 -->
+	<bean id="modelUser.column4" class="com.ljh.yqvalley.file.model.ExcelColumnEntity">
+		<property name="fieldName" value="phoneNumber"></property>
+		<property name="validator" value="required"></property>
+		<property name="type" value="integer"></property>
+		<property name="columnWidth" value="4000"></property>
+	</bean>
+	<!-- 账号类型 -->
+	<bean id="modelUser.column5" class="com.ljh.yqvalley.file.model.ExcelColumnEntity">
+		<property name="fieldName" value="accountType"></property>
+		<property name="columnWidth" value="4000"></property>
+	</bean>
+</beans>
